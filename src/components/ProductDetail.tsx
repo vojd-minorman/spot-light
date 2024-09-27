@@ -28,7 +28,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ id }) => {
 
       try {
         setLoading(true)
-        const response = await axios.get<Product>(`https://api-ecommerce-express-e5kr.onrender.com/products/${id}`)
+        const response = await axios.get<Product>(`/api/products/${id}`)
         setProduct(response.data)
       } catch (error) {
         console.error('Error fetching product:', error)

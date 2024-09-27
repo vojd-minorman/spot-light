@@ -18,7 +18,7 @@ const ProductList: React.FC = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await axios.get<Product[]>('https://api-ecommerce-express-e5kr.onrender.com/products')
+        const response = await axios.get<Product[]>('/api/products')
         setProducts(response.data)
       } catch (error) {
         console.error('Error fetching products:', error)
