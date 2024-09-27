@@ -1,75 +1,104 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-
-interface Product {
-  id: number
-  images: string[]
-  properties: string[]
-  title: string
-  regularPrice: string
-}
+import React, { useState } from 'react'
+import { Plus, Minus } from 'lucide-react'
+import { useCart } from '../contexts/CartContext'
 
 interface ProductDetailProps {
-  id: string | undefined
+  product: {
+    id: number
+    name: string
+    price: number
+    images: string[]
+    description: string
+    features: string[]
+    inStock: boolean
+  }
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ id }) => {
-  const [product, setProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
+  const [mainImage, setMainImage] = useState(product.images[0])
+  const [quantity, setQuantity] = useState(1)
+  const { addToCart } = useCart()
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (!id) {
-        setError('Product ID is missing')
-        setLoading(false)
-        return
-      }
-
-      try {
-        setLoading(true)
-        const response = await axios.get<Product>(`/api/products/${id}`)
-        setProduct(response.data)
-      } catch (error) {
-        console.error('Error fetching product:', error)
-        setError('Failed to load product. Please try again later.')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProduct()
-  }, [id])
-
-  if (loading) {
-    return <div className="text-center py-10">Loading product...</div>
+  const handleQuantityChange = (amount: number) => {
+    setQuantity(Math.max(1, quantity + amount))
   }
 
-  if (error) {
-    return <div className="text-center py-10 text-red-600">{error}</div>
+  const handleImageSwap = () => {
+    setMainImage(prevImage => 
+      prevImage === product.images[0] ? product.images[1] : product.images[0]
+    )
   }
 
-  if (!product) {
-    return <div className="text-center py-10">Product not found.</div>
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      imageUrl: product.images[0]
+    })
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="md:flex">
-        <div className="md:flex-shrink-0">
-          <img src={product.images[0]} alt={product.title} className="h-48 w-full object-cover md:w-48" />
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-1/2 mb-8 md:mb-0">
+          <img src={mainImage} alt={product.name} className="w-full h-auto object-cover rounded-lg shadow-md" />
+          <div className="mt-4">
+            <button
+              onClick={handleImageSwap}
+              className="w-20 h-20 border-2 rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <img 
+                src={mainImage === product.images[0] ? product.images[1] : product.images[0]} 
+                alt={`${product.name} thumbnail`} 
+                className="w-full h-full object-cover" 
+              />
+            </button>
+          </div>
         </div>
-        <div className="p-8">
-          <h2 className="text-2xl font-semibold">{product.title}</h2>
-          <p className="mt-2 text-gray-600">{product.regularPrice}</p>
-          <ul className="mt-4 list-disc list-inside">
-            {product.properties.map((prop, index) => (
-              <li key={index}>{prop}</li>
+        <div className="md:w-1/2 md:pl-8">
+          <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+          <p className="text-2xl font-semibold mb-6">${product.price.toFixed(2)} CAD</p>
+          <div className="flex items-center mb-6">
+            <span className="mr-4">Quantity</span>
+            <button
+              onClick={() => handleQuantityChange(-1)}
+              className="p-2 border rounded-l-md"
+              disabled={quantity <= 1}
+            >
+              <Minus size={16} />
+            </button>
+            <span className="px-4 py-2 border-t border-b">{quantity}</span>
+            <button
+              onClick={() => handleQuantityChange(1)}
+              className="p-2 border rounded-r-md"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+          {product.inStock ? (
+            <button 
+              onClick={handleAddToCart}
+              className="w-full bg-yellow-400 text-black py-3 rounded-md font-semibold hover:bg-yellow-500 transition-colors mb-4"
+            >
+              Buy it now
+            </button>
+          ) : (
+            <button className="w-full bg-gray-300 text-gray-600 py-3 rounded-md font-semibold cursor-not-allowed mb-4">
+              Sold out
+            </button>
+          )}
+          <p className="text-sm text-gray-600 mb-6">
+            This is a demonstration store. You can purchase products like this from Coursework
+          </p>
+          <p className="mb-6">{product.description}</p>
+          <ul className="list-disc list-inside space-y-2">
+            {product.features.map((feature, index) => (
+              <li key={index}>{feature}</li>
             ))}
           </ul>
-          <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            Add to Cart
-          </button>
+          <button className="mt-6 text-sm text-gray-600 hover:text-gray-900">Share</button>
         </div>
       </div>
     </div>
