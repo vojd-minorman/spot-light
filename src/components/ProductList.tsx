@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-
-interface Product {
-  id: number
-  images: string[]
-  title: string
-  regularPrice: string
-}
+import { Product } from '../types'
 
 const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -18,7 +12,7 @@ const ProductList: React.FC = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await axios.get<Product[]>('/api/products')
+        const response = await axios.get<Product[]>('https://api-ecommerce-express-e5kr.onrender.com/products')
         setProducts(response.data)
       } catch (error) {
         console.error('Error fetching products:', error)
