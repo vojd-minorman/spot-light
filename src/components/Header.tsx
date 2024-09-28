@@ -14,8 +14,12 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-white py-4 px-6 flex items-center justify-between">
-      <Link to="/" className="text-2xl font-bold uppercase tracking-wider">
-        Spot Light
+      <Link to="/" className="flex items-center">
+        <img 
+          src="/logo-header.png" 
+          alt="Spot Light Logo" 
+          className="h-8 w-auto"
+        />
       </Link>
       <div className="flex items-center space-x-4">
         <button
